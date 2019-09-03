@@ -5,7 +5,8 @@ recr_length = 0.0
 recb_length = 0
 recr_real = 15.0
 recb_real = 0
-
+loc_x=0
+loc_y=0
 def nothing(x):
     pass
 
@@ -19,12 +20,7 @@ def nothing(x):
 #cv2.createTrackbar("UV", "Tracking", 255, 255, nothing)
 
 ######decrease resolution######
-frame = cv2.imread('Img3_14cm.jpg')
-scale_percent = 60 # percent of original size
-width = int(frame.shape[1] * scale_percent / 100)
-height = int(frame.shape[0] * scale_percent / 100)
-dim = (width, height)
-resized = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
+resized = cv2.imread('rect2.jpg')
 
 
 #l_h = cv2.getTrackbarPos("LH", "Tracking")
@@ -57,7 +53,6 @@ for contour in contours:
     cv2.drawContours(resized, [approx], 0, (0, 0, 0), 5)
     rotatedRect = cv2.minAreaRect(contour)
     angle = rotatedRect[2]
-    #print(angle)
     x = approx.ravel()[0]
     y = approx.ravel()[1] - 5
     #if len(approx) == 4:
@@ -67,13 +62,11 @@ for contour in contours:
     if angle >= -92 and angle <= -80 or angle >=-1 and angle <=1 or angle <=90.0 and angle >=85:
 
         if w > h:
-            recr_length =recr_length + w
+            recr_length =recr_length + w + 40
         else:
-            recr_length =recr_length + h
-        print(recr_length)
+            recr_length =recr_length + h +40
     else:
         recr_length += math.sqrt(math.pow(w,2)+math.pow(h,2))
-    print(recr_length)
 
 
 cv2.drawContours(res_red,contours,0,(0,255,0),3)
@@ -93,10 +86,12 @@ for contour in contours:
     y = approx.ravel()[1] - 5
     #if len(approx) == 4:
     x1 ,y1, w, h = cv2.boundingRect(approx)
-    
+
     if w < 80 or h <80: #noise
         continue
-
+    else:
+        loc_x=x1
+        loc_y=y1
     if angle >= -92 and angle <= -80 or angle >=-1 and angle <=1 or angle <=90.0 and angle >=85:
 
         if w > h:
@@ -113,10 +108,12 @@ for contour in contours:
 #cv2.imshow("imgGrey", imgGrey)
 #cv2.imshow("mask", mask)
 #cv2.imshow("res", res)
-cv2.namedWindow("Resized image", cv2.WINDOW_NORMAL)
-cv2.imshow("Resized image", resized)
+
 recb_real = (recr_real*recb_length)/recr_length
 print(recb_real)
-
+font = cv2.FONT_HERSHEY_SIMPLEX
+cv2.putText(resized,str(recb_real),(loc_x,loc_y),font,3,(255,255,255),10)
+cv2.namedWindow("Resized image", cv2.WINDOW_NORMAL)
+cv2.imshow("Resized image", resized)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
